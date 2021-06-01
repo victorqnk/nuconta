@@ -43,7 +43,8 @@ class DescriptionBox extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              bool result = balance >= offer.price ? true : false;
+              Navigator.pop(context, result);
             },
             child: Text('Purchase'),
           ),

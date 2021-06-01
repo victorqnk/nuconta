@@ -1,10 +1,12 @@
-class User {
+import 'package:flutter/cupertino.dart';
+
+class User with ChangeNotifier {
   final String id;
   final String name;
-  final int balance;
+  int balance;
   final List offers;
 
-  const User({
+  User({
     required this.id,
     required this.name,
     required this.balance,
@@ -18,5 +20,15 @@ class User {
       balance: doc['balance'],
       offers: doc['offers'],
     );
+  }
+
+  void resetBalance() {
+    balance = 1000000;
+    notifyListeners();
+  }
+
+  void makePurchase(int price) {
+    balance -= price;
+    notifyListeners();
   }
 }

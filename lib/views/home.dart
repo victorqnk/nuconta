@@ -5,6 +5,7 @@ import 'package:nuconta/components/product.dart';
 import 'package:nuconta/model/offer.dart';
 import 'package:nuconta/model/user.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int balance = 0;
+  final _key = GlobalKey<ScaffoldState>();
+  // int balance = 0;
 
   final String query = '''
     query getData {
@@ -34,9 +36,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   ''';
 
+  void purchase(Offer offer, User user, BuildContext context) async {
+    String message;
+    bool response = await showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        return DescriptionBox(
+          offer: offer,
+          balance: user.balance,
+        );
+      },
+    );
+    if (response) {
+      user.makePurchase(offer.price);
+      message = 'Tu compra fue exitosa.';
+    } else {
+      message = 'No tienes suficiente saldo.';
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _key,
       backgroundColor: Theme.of(context).primaryColor,
       body: Query(
         options: QueryOptions(document: gql(query)),
@@ -50,72 +76,82 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           // print(result.data!['viewer']['offers'].runtimeType);
-          User user = User.fromQuery(result.data!['viewer']);
+          // User user = User.fromQuery(result.data!['viewer']);
           // print(user.offers.length);
 
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Hello, ${user.name}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-                SizedBox(height: 16.0),
-                Card(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          return ChangeNotifierProvider.value(
+            value: User.fromQuery(result.data!['viewer']),
+            builder: (context, child) {
+              var user = Provider.of<User>(context);
+              return Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Current balance'),
-                        SizedBox(height: 8.0),
                         Text(
-                          '${NumberFormat.simpleCurrency().format(user.balance)}',
+                          'Hello, ${user.name}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 24.0,
-                            color: Colors.blue,
+                            color: Colors.white,
+                            fontSize: 24,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            user.resetBalance();
+                          },
+                          icon: Icon(
+                            Icons.restore,
+                            color: Colors.white70,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-                Expanded(
-                  child: GridView.builder(
-                    itemCount: user.offers.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
+                    SizedBox(height: 16.0),
+                    Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Current balance'),
+                            SizedBox(height: 8.0),
+                            Text(
+                              '${NumberFormat.simpleCurrency().format(user.balance)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24.0,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    itemBuilder: (context, index) {
-                      var offer = Offer.fromQuery(user.offers[index]);
+                    Expanded(
+                      child: GridView.builder(
+                        itemCount: user.offers.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                        ),
+                        itemBuilder: (context, index) {
+                          var offer = Offer.fromQuery(user.offers[index]);
 
-                      return GestureDetector(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (ctx) {
-                              return DescriptionBox(
-                                offer: offer,
-                                balance: balance,
-                              );
-                            },
+                          return GestureDetector(
+                            onTap: () => purchase(offer, user, context),
+                            child: ProductWidget(offer: offer),
                           );
                         },
-                        child: ProductWidget(offer: offer),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),

@@ -12,6 +12,7 @@ class GraphQLService {
   late final Link link = _authLink.concat(_httpLink);
   late final ValueNotifier<GraphQLClient> client;
 
+  // initialize the service
   GraphQLService() {
     _httpLink = HttpLink(_url);
     _authLink = AuthLink(getToken: () => 'Bearer $_token');

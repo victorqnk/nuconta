@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:nuconta/model/offer.dart';
 
 class ProductWidget extends StatelessWidget {
-  const ProductWidget({
-    Key? key,
-    required this.offer,
-  }) : super(key: key);
-
-  final Offer offer;
+  final String image;
+  final String title;
+  const ProductWidget({required this.image, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -19,22 +15,20 @@ class ProductWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Image.network(
-              offer.product.image,
+              image,
               fit: BoxFit.contain,
-              height: 120.0,
+              height: 100.0,
             ),
           ),
           Text(
-            offer.product.name,
+            title,
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          // Text(
-          //     '${NumberFormat.simpleCurrency().format(user.offers[index]['price'])}'),
         ],
       ),
     );

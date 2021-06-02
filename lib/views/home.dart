@@ -14,7 +14,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _key = GlobalKey<ScaffoldState>();
-  // int balance = 0;
 
   final String query = '''
     query getData {
@@ -39,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void purchase(Offer offer, User user, BuildContext context) async {
     String message;
     bool response = await showModalBottomSheet(
+      isDismissible: false,
       context: context,
       builder: (ctx) {
         return DescriptionBox(
@@ -75,10 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(child: CircularProgressIndicator());
           }
 
-          // print(result.data!['viewer']['offers'].runtimeType);
-          // User user = User.fromQuery(result.data!['viewer']);
-          // print(user.offers.length);
-
           return ChangeNotifierProvider.value(
             value: User.fromQuery(result.data!['viewer']),
             builder: (context, child) {
@@ -88,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    SizedBox(height: 24.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -102,6 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         IconButton(
                           onPressed: () {
                             user.resetBalance();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Restauraste tu balance')),
+                            );
                           },
                           icon: Icon(
                             Icons.restore,
@@ -143,7 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
                           return GestureDetector(
                             onTap: () => purchase(offer, user, context),
-                            child: ProductWidget(offer: offer),
+                            child: ProductWidget(
+                              image: offer.product.image,
+                              title: offer.product.name,
+                            ),
                           );
                         },
                       ),

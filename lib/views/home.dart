@@ -13,8 +13,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _key = GlobalKey<ScaffoldState>();
-
   final String query = '''
     query getData {
       viewer {
@@ -49,9 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (response) {
       user.makePurchase(offer.price);
-      message = 'Tu compra fue exitosa.';
+      message = 'You just bought a ${offer.product.name}.';
     } else {
-      message = 'No tienes suficiente saldo.';
+      message = 'You can\'t afford to buy a ${offer.product.name}.';
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -62,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _key,
       backgroundColor: Theme.of(context).primaryColor,
       body: Query(
         options: QueryOptions(document: gql(query)),
@@ -96,11 +93,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             fontSize: 24,
                           ),
                         ),
+                        // just for testing
                         IconButton(
                           onPressed: () {
                             user.resetBalance();
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Restauraste tu balance')),
+                              SnackBar(
+                                  content: Text(
+                                      'You reset your balance (just for testing)')),
                             );
                           },
                           icon: Icon(

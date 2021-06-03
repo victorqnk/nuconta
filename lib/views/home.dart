@@ -99,8 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             user.resetBalance();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text(
-                                      'You reset your balance (just for testing)')),
+                                content: Text(
+                                    'You reset your balance (for testing)'),
+                              ),
                             );
                           },
                           icon: Icon(
